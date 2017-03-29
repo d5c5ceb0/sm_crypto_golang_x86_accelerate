@@ -15,6 +15,7 @@ import (
 	"crypto/sha512"
 	"encoding/asn1"
 	"errors"
+	//	"fmt"
 	"io"
 	"math/big"
 )
@@ -81,7 +82,8 @@ func GenerateKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
 	priv := new(PrivateKey)
 	priv.PublicKey.Curve = c
 	priv.D = k
-	priv.PublicKey.X, priv.PublicKey.Y = c.ScalarBaseMult(k.Bytes())
+	//priv.PublicKey.X, priv.PublicKey.Y = c.ScalarBaseMult(k.Bytes())
+	priv.PublicKey.X, priv.PublicKey.Y = p256.ScalarBaseMult(k.Bytes())
 	return priv, nil
 }
 
@@ -140,7 +142,8 @@ func Sign(rand io.Reader, priv *PrivateKey, hash []byte) (r, s *big.Int, err err
 				return
 			}
 
-			r, _ = priv.Curve.ScalarBaseMult(k.Bytes())
+			//r, _ = priv.Curve.ScalarBaseMult(k.Bytes())
+			r, _ = p256.ScalarBaseMult(k.Bytes())
 			r.Add(r, e)
 			r.Mod(r, N)
 			if r.Sign() != 0 {
@@ -186,13 +189,17 @@ func Verify(pub *PublicKey, hash []byte, r, s *big.Int) bool {
 
 	// Check if implements s*g + t*p
 	var x *big.Int
-	if opt, ok := c.(combinedMult); ok {
-		x, _ = opt.CombinedMult(pub.X, pub.Y, s.Bytes(), t.Bytes())
-	} else {
-		x1, y1 := c.ScalarBaseMult(s.Bytes())
-		x2, y2 := c.ScalarMult(pub.X, pub.Y, t.Bytes())
-		x, _ = c.Add(x1, y1, x2, y2)
-	}
+	/*
+		if opt, ok := c.(combinedMult); ok {
+			x, _ = opt.CombinedMult(pub.X, pub.Y, s.Bytes(), t.Bytes())
+		} else {
+			x1, y1 := c.ScalarBaseMult(s.Bytes())
+			x2, y2 := c.ScalarMult(pub.X, pub.Y, t.Bytes())
+			x, _ = c.Add(x1, y1, x2, y2)
+		}
+	*/
+
+	x, _ = p256.CombinedMult(pub.X, pub.Y, s.Bytes(), t.Bytes())
 
 	e := new(big.Int).SetBytes(hash)
 	x.Add(x, e)

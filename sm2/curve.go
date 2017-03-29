@@ -17,7 +17,9 @@ var initonce sync.Once
 var p256_sm2 *elliptic.CurveParams
 
 func initAll() {
-	initP256_sm2()
+	//initP256_sm2()
+	//initP256_sm2_2()
+	initP256()
 }
 
 func initP256_sm2() {
@@ -36,5 +38,6 @@ func initP256_sm2() {
 // The cryptographic operations are implemented using constant-time algorithms.
 func P256_sm2() elliptic.Curve {
 	initonce.Do(initAll)
-	return p256_sm2
+	//return p256_sm2
+	return p256
 }
