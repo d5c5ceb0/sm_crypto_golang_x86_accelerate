@@ -376,7 +376,6 @@ TEXT ·p256_sm2Sqr(SB),NOSPLIT,$0
 
 	RET
 /* ---------------------------------------*/
-	/*
 // func p256_sm2Mul(res, in1, in2 []uint64)
 TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	MOVQ res+0(FP), res_ptr
@@ -411,14 +410,24 @@ TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	// First reduction step
 	MOVQ acc0, AX
 	MOVQ acc0, t1
-	SHLQ $32, acc0
 	MULQ p256_sm2const1<>(SB)
-	SHRQ $32, t1
 	ADDQ acc0, acc1
-	ADCQ t1, acc2
-	ADCQ AX, acc3
+	ADCQ $0, acc2
+	ADCQ acc0, acc3
+	ADCQ $0, DX
+	ADDQ AX, acc3
+	ADCQ $0, DX
+	MOVQ acc0, AX
 	ADCQ DX, acc4
 	ADCQ $0, acc5
+
+	SHLQ $32, AX
+	SHRQ $32, t1
+	SUBQ AX, acc1
+	SBBQ t1, acc2
+	SBBQ $0, acc3
+	SBBQ $0, acc4
+	SBBQ $0, acc5
 	XORQ acc0, acc0
 	// x * y[1]
 	MOVQ (8*1)(y_ptr), t0
@@ -455,14 +464,24 @@ TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	// Second reduction step
 	MOVQ acc1, AX
 	MOVQ acc1, t1
-	SHLQ $32, acc1
 	MULQ p256_sm2const1<>(SB)
-	SHRQ $32, t1
 	ADDQ acc1, acc2
-	ADCQ t1, acc3
-	ADCQ AX, acc4
+	ADCQ $0, acc3
+	ADCQ acc1, acc4
+	ADCQ $0, DX
+	ADDQ AX, acc4
+	ADCQ $0, DX
+	MOVQ acc1, AX
 	ADCQ DX, acc5
 	ADCQ $0, acc0
+
+	SHLQ $32, AX
+	SHRQ $32, t1
+	SUBQ AX, acc2
+	SBBQ t1, acc3
+	SBBQ $0, acc4
+	SBBQ $0, acc5
+	SBBQ $0, acc0
 	XORQ acc1, acc1
 	// x * y[2]
 	MOVQ (8*2)(y_ptr), t0
@@ -499,14 +518,24 @@ TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	// Third reduction step
 	MOVQ acc2, AX
 	MOVQ acc2, t1
-	SHLQ $32, acc2
 	MULQ p256_sm2const1<>(SB)
-	SHRQ $32, t1
 	ADDQ acc2, acc3
-	ADCQ t1, acc4
-	ADCQ AX, acc5
+	ADCQ $0, acc4
+	ADCQ acc2, acc5
+	ADCQ $0, DX
+	ADDQ AX, acc5
+	ADCQ $0, DX
+	MOVQ acc2, AX
 	ADCQ DX, acc0
 	ADCQ $0, acc1
+
+	SHLQ $32, AX
+	SHRQ $32, t1
+	SUBQ AX, acc3
+	SBBQ t1, acc4
+	SBBQ $0, acc5
+	SBBQ $0, acc0
+	SBBQ $0, acc1
 	XORQ acc2, acc2
 	// x * y[3]
 	MOVQ (8*3)(y_ptr), t0
@@ -541,16 +570,27 @@ TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	ADCQ DX, acc1
 	ADCQ $0, acc2
 	// Last reduction step
+	XORQ t0, t0
 	MOVQ acc3, AX
 	MOVQ acc3, t1
-	SHLQ $32, acc3
 	MULQ p256_sm2const1<>(SB)
-	SHRQ $32, t1
 	ADDQ acc3, acc4
-	ADCQ t1, acc5
-	ADCQ AX, acc0
+	ADCQ $0, acc5
+	ADCQ acc3, acc0
+	ADCQ $0, DX
+	ADDQ AX, acc0
+	ADCQ $0, DX
+	MOVQ acc3, AX
 	ADCQ DX, acc1
 	ADCQ $0, acc2
+
+	SHLQ $32, AX
+	SHRQ $32, t1
+	SUBQ AX, acc4
+	SBBQ t1, acc5
+	SBBQ $0, acc0
+	SBBQ $0, acc1
+	SBBQ $0, acc2
 	// Copy result [255:0]
 	MOVQ acc4, x_ptr
 	MOVQ acc5, acc3
@@ -575,9 +615,10 @@ TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	MOVQ acc1, (8*3)(res_ptr)
 
 	RET
-	*/
+
 
 /* ---------------------------------------*/
+/*
 TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	MOVQ res+0(FP), res_ptr
 	MOVQ in1+24(FP), x_ptr
@@ -863,6 +904,7 @@ TEXT ·p256_sm2Mul(SB),NOSPLIT,$0
 	MOVQ acc1, (8*3)(res_ptr)
 
 	RET
+	*/
 /* ---------------------------------------*/
 
 // func p256_sm2FromMont(res, in []uint64)
