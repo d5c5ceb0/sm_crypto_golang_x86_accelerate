@@ -10,7 +10,7 @@ package sm2
 import (
 	"crypto/elliptic"
 	"crypto/rand"
-	"fmt"
+	//"fmt"
 	"math/big"
 	"sm_crypto_golang/sm3"
 	"testing"
@@ -95,7 +95,7 @@ func TestSignAndVerify(t *testing.T) {
 	}
 
 	for i := 0; i < 1; i++ {
-		fmt.Println(i)
+		//fmt.Println(i)
 		testSignAndVerify(t, c.Params(), "sm2 p256")
 	}
 }
